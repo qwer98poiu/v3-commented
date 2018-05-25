@@ -1,0 +1,8 @@
+/examples/darknet.c
+	main() and some utilities like averaging several weight files, timing, normalizing, visualizing, etc
+	
+/examples/detector.c
+	code for training, validating or testing the detector
+	
+/src/utils.c
+	timing, dealing with args, exceptions, etc

@@ -3,8 +3,11 @@ darknet [-i gpu_index/-nogpu] [command]
 
 COMMANDS
 
-detector 
-	run_detector
+detector [-prefix prefix] [-thresh threshold] [-hier hier_threshold] [-c camera_index] [-s frame_skip] [-avg avg] [-gpus list_of_gpus] [-out outfile] [-clear] [-fullscreen] [-w width] [-h height] [-fps fps] 
+	[train/test/valid/valid2/recall/demo] [datacfg] [cfg] [weights(optional)] [filename(optional)]
+
+	default: [-prefix 0] [-thresh 0.5] [-hier 0.5] [-c 0] [-s 0] [-avg 3]
+	
 
 detect
 
