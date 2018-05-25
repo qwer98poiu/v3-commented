@@ -5,15 +5,17 @@ static int coco_ids[] = {1,2,3,4,5,6,7,8,9,10,11,13,14,15,16,17,18,19,20,21,22,2
 
 void train_detector(char *datacfg, char *cfgfile, char *weightfile, int *gpus, int ngpus, int clear)
 {
+    //parse datacfg, load training images list and backup directory
     list *options = read_data_cfg(datacfg);
     char *train_images = option_find_str(options, "train", "data/train.list");
     char *backup_directory = option_find_str(options, "backup", "/backup/");
 
     srand(time(0));
     char *base = basecfg(cfgfile);
-    printf("%s\n", base);
+    printf("%s\n", base);//print the name of cfgfile
     float avg_loss = -1;
-    network **nets = calloc(ngpus, sizeof(network));
+    network **nets = calloc(ngpus, sizeof(network)); //allocate memory for network, allocate multiple networks if using more than one gpu
+
 
     srand(time(0));
     int seed = rand();
@@ -23,24 +25,24 @@ void train_detector(char *datacfg, char *cfgfile, char *weightfile, int *gpus, i
 #ifdef GPU
         cuda_set_device(gpus[i]);
 #endif
-        nets[i] = load_network(cfgfile, weightfile, clear);
-        nets[i]->learning_rate *= ngpus;
+        nets[i] = load_network(cfgfile, weightfile, clear);//load network from cfgfile and weightfile
+        nets[i]->learning_rate *= ngpus;//set different learning rates for different gpus
     }
     srand(time(0));
     network *net = nets[0];
 
-    int imgs = net->batch * net->subdivisions * ngpus;
+    int imgs = net->batch * net->subdivisions * ngpus;//number of images in an iteration
     printf("Learning Rate: %g, Momentum: %g, Decay: %g\n", net->learning_rate, net->momentum, net->decay);
     data train, buffer;
 
-    layer l = net->layers[net->n - 1];
+    layer l = net->layers[net->n - 1];//read args of the last layer(output layer)
 
     int classes = l.classes;
     float jitter = l.jitter;
 
     list *plist = get_paths(train_images);
     //int N = plist->size;
-    char **paths = (char **)list_to_array(plist);
+    char **paths = (char **)list_to_array(plist);//generate a two-dimensional array of paths of train images
 
     load_args args = get_base_args(net);
     args.coords = l.coords;
@@ -55,6 +57,8 @@ void train_detector(char *datacfg, char *cfgfile, char *weightfile, int *gpus, i
     //args.type = INSTANCE_DATA;
     args.threads = 64;
 
+    //load images and labels for one iteration, images are ramdomly placed and distorted
+    //
     pthread_t load_thread = load_data(args);
     double time;
     int count = 0;
@@ -353,7 +357,7 @@ void validate_detector_flip(char *datacfg, char *cfgfile, char *weightfile, char
         if(fps) fclose(fps[j]);
     }
     if(coco){
-        fseek(fp, -2, SEEK_CUR); 
+        fseek(fp, -2, SEEK_CUR);
         fprintf(fp, "\n]\n");
         fclose(fp);
     }
@@ -479,7 +483,7 @@ void validate_detector(char *datacfg, char *cfgfile, char *weightfile, char *out
         if(fps) fclose(fps[j]);
     }
     if(coco){
-        fseek(fp, -2, SEEK_CUR); 
+        fseek(fp, -2, SEEK_CUR);
         fprintf(fp, "\n]\n");
         fclose(fp);
     }
@@ -609,7 +613,7 @@ void test_detector(char *datacfg, char *cfgfile, char *weightfile, char *filenam
         else{
             save_image(im, "predictions");
 #ifdef OPENCV
-            cvNamedWindow("predictions", CV_WINDOW_NORMAL); 
+            cvNamedWindow("predictions", CV_WINDOW_NORMAL);
             if(fullscreen){
                 cvSetWindowProperty("predictions", CV_WND_PROP_FULLSCREEN, CV_WINDOW_FULLSCREEN);
             }
@@ -653,7 +657,7 @@ void censor_detector(char *datacfg, char *cfgfile, char *weightfile, int cam_ind
     }
 
     if(!cap) error("Couldn't connect to webcam.\n");
-    cvNamedWindow(base, CV_WINDOW_NORMAL); 
+    cvNamedWindow(base, CV_WINDOW_NORMAL);
     cvResizeWindow(base, 512, 512);
     float fps = 0;
     int i;
@@ -726,7 +730,7 @@ void extract_detector(char *datacfg, char *cfgfile, char *weightfile, int cam_in
     }
 
     if(!cap) error("Couldn't connect to webcam.\n");
-    cvNamedWindow(base, CV_WINDOW_NORMAL); 
+    cvNamedWindow(base, CV_WINDOW_NORMAL);
     cvResizeWindow(base, 512, 512);
     float fps = 0;
     int i;

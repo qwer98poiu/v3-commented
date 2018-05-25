@@ -1,0 +1,14 @@
+SYNOPSIS
+darknet [-i gpu_index/-nogpu] [command]
+
+COMMANDS
+
+detector 
+	run_detector
+
+detect
+
+.
+.
+.
+
